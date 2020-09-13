@@ -57,16 +57,48 @@ class Analisis:
     
     def __init__(self, diario_prep):
         self.diario_prep = diario_prep
+        self.alegria = 0
+        self.enojo = 0
+        self.miedo = 0
+        self.repulsion = 0
+        self.sorpresa = 0
+        self.tristeza = 0
+        self.ambiguo = 0
         
     def extraerPKL(self):
         with open('Modelo_entrenado.pkl', 'rb') as fo:  #?
             loaded_model = joblib.load(fo)
         return loaded_model
         
-    def realizarAnalisis(self, diario_prep):
+    def realizarAnalisis(self):
         modelo = self.extraerPKL()
-        emociones = modelo.predict(diario_prep)
+        emociones = modelo.predict(self.diario_prep)
         return emociones
+    
+    def eliminarCE(self, emocion):
+        opciones = {'Alegría': 'alegria', 'Miedo': 'miedo', 
+                    'Repulsión': 'repulsion', 'Enojo': 'enojo', 
+                    'Tristeza': 'tristeza', 'Sorpresa': 'sorpresa', 
+                    'None': 'ambiguo'}
+        return(opciones.get(emocion))
+    
+    def analisisPonderado(self):
+        emociones = self.realizarAnalisis()
+        ponderacion = {'alegria':0,'miedo':0, 'repulsion':0,'enojo':0, 
+                    'tristeza':0, 'sorpresa':0, 'ambiguo':0}
+        len_emociones = len(emociones)
+        
+        for emocion in emociones:
+            ponderacion[self.eliminarCE(emocion.strip())] += 1
+        
+        
+        self.alegria = ponderacion['alegria'] * 100 // len_emociones
+        self.enojo = ponderacion['enojo'] * 100 // len_emociones
+        self.miedo = ponderacion['miedo'] * 100 // len_emociones
+        self.repulsion = ponderacion['repulsion'] * 100 // len_emociones
+        self.sorpresa = ponderacion['sorpresa'] * 100 // len_emociones
+        self.tristeza = ponderacion['tristeza'] * 100 // len_emociones
+        self.ambiguo = ponderacion['ambiguo'] * 100 // len_emociones
         
 
 def main():
@@ -76,7 +108,15 @@ def main():
     resultado = Analisis(a.diario_prep)
     print(a.diario_prep)
     print()
-    print(resultado.realizarAnalisis(a.diario_prep))
+    print(resultado.analisisPonderado())
+    print()
+    print(resultado.alegria)
+    print(resultado.enojo)
+    print(resultado.miedo)
+    print(resultado.repulsion)
+    print(resultado.sorpresa)
+    print(resultado.tristeza)
+    print(resultado.ambiguo)
     
     
 if __name__ == '__main__':
