@@ -96,6 +96,67 @@ class sentences:
         self.etiquetado_verbos()
         self.etiquetado_dicc()
 
+    def completarOraciones(self):
+        n = 5
+        nueva = []
+        oraciones = self.oraciones
+        oraciones_finales = []
+        for indice, oracion in enumerate(oraciones):
+            
+            if(indice == len(oraciones) - 1):#Si es el ultimo elemento 
+                if len(oracion.split()) <= n: #Si el ultimo es menor a 4
+                    nueva[-1] += " " + oracion #Se concatena al FINAL del ultimo elemento de "nueva"
+                else:#Si el ultimo es mayor a 3
+                    nueva.append(oracion) #Se inserta la oracion como un nuevo elemento a "nueva"
+                oraciones[indice] = ""
+            
+            elif indice == 0:#Si es la primer oracion
+                if len(oracion.split()) <= n: 
+                    oracion += " " + oraciones[indice + 1] #Se concantena al inicio de la siguiente oracion
+                    if len(oracion.split()) <= n:
+                        oraciones[indice +1] = oracion
+                        nueva.append('') 
+                    else:
+                        nueva.append(oracion)
+                        oraciones[indice + 1] = ''
+                else:
+                    nueva.append(oracion) #Se inserta la oracion como un nuevo elemento a "nueva"
+                oraciones[indice] = ""
+
+            elif len(oracion.split()) <= n: #Si no es el ultimo ni el primero y es menor o igual 3
+                #Si la siguiente oracion de "oraciones" tiene mas palabras que la ultima de "nueva"
+                if nueva[-1] != '':
+                    if len(oraciones[indice+1].split()) < len(nueva[-1].split()):
+                        #Se concatena al INICIO de la siguiente oracion y se almacena en "oracion"
+                        oracion += " " + oraciones[indice + 1]
+                        #Se inserta el resultado de "oracion" a la siguiente oracion 
+                        oraciones[indice+1] = oracion 
+                    else: #Si la oracion anterior es menor a la siguiente
+                        nueva[-1] += " " + oracion #Se concatena la FINAL la oracion de el ultimo elemento de "nueva"
+                    oraciones[indice] = '' 
+                else:
+                    if len(oracion.split()) <= n: 
+                        oracion += " " + oraciones[indice + 1] #Se concantena al inicio de la siguiente oracion
+                        if len(oracion.split()) <= n:
+                            oraciones[indice +1] = oracion
+                            nueva.append('') 
+                        else:
+                            nueva.append(oracion)
+                            oraciones[indice + 1] = ''
+                    else:
+                        nueva.append(oracion) #Se inserta la oracion como un nuevo elemento a "nueva"
+                    oraciones[indice] = ""
+            else: #Si la oracion no es primera ni ultima y es mayor a 3 lo inserta directo
+                nueva.append(oracion)
+                oraciones[indice] = ""
+        
+        for oracion in nueva:
+            if oracion != '':
+                oraciones_finales.append(oracion)
+
+
+        self.oraciones = oraciones_finales 
+
     def crear_oraciones(self):
         self.etiquetado()
 
@@ -119,6 +180,7 @@ class sentences:
             else:
                 oraciones.append(nodo[0])
         self.oraciones = oraciones
+        self.completarOraciones()
 
 def main():
     contenido_diario = "Hoy empecé el día tomando un buen desayuno, con café y postre. Luego de esto fui al trabajo, soy periodista y he tenido que investigar bastante en estos días. Casi no me ha dejado tiempo para compartir con algunos amigos, pero estoy bien porque me gusta lo que hago. En la tarde cuando salía de hacer mis labores me encontré con Nick, él es mi vecino y me parece muy guapo. Me invitó a cenar, acepté y la pasamos genial. Cuando llegué a mi casa me di cuenta que se me había olvidado pagar los servicios, por lo que no tenía nada de luz. Toqué la puerta de Nick, pero al parecer se había quedado profundamente dormido. Así que tuve que improvisar al prender unas velas y estuve observando mucho por la ventana a los caminantes nocturnos, cosa que no hacía desde hace mucho. En seguida noté que había muchos vagabundos y me pregunté: ¿Qué habrá pasado para que terminaran en ese lugar? Después de no encontrar respuestas a mi pregunta me hice poco de té. Apenas y podía ver la llama de la candela. Alguien tocaba a la puerta y pude ver por el picaporte que era Nick. Me sentí muy aliviada en ese momento, así que le abrí, pudimos conversar un rato y me invitó a pasar la noche en su casa. Al día siguiente me devolví a mi hogar, al pasarla junto con mi vecino tenía muchas emociones juntas y en realidad se convirtió en la mejor noche de mi vida. Y sin más que agregar, buenas noches y hasta mañana."
