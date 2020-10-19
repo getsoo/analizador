@@ -1,13 +1,16 @@
 import codecs
 import nltk
+from nltk.stem.snowball import SnowballStemmer
 
 class sentences:
     '''Separa un texto en oraciones'''
-    def __init__(self, diario, ruta_nombres):
+    def __init__(self, diario, ruta_nombres, ruta_verbos, ruta_dicc_etiquetado):
         self.diario = diario
         self.diario_etiquetado = []
         self.oraciones_diario = []
         self.ruta_nombres = ruta_nombres
+        self.ruta_verbos = ruta_verbos
+        self.ruta_dicc_etiquetado = ruta_dicc_etiquetado
     
     def etiquetado_regex(self):
         patterns=[(r'.*(ar|er|ir|cé|né|ando|iendo)$','V'), # Verbo en infinitivo
@@ -40,14 +43,61 @@ class sentences:
                 tupla=(palabra,tag)
                 tagged.append(tupla)
         self.diario_etiquetado = tagged
+
+    def etiquetado_verbos(self):
+        f = codecs.open(self.ruta_verbos, 'r')
+        verbos = f.readlines()
+        f.close()
+        verbos = [verbo.strip() for verbo in verbos]
+
+        stemmer = SnowballStemmer("spanish", ignore_stopwords=True) 
+        verbos_lemma = [stemmer.stem(palabra) for palabra in verbos] #Lemmatizamos cada verbo y metemos su lemma en uuna lista
+
+        tagged = []
+
+        for palabra,tag in (self.diario_etiquetado):
+            palabra = palabra.lower()
+            palabra_stem = stemmer.stem(palabra)
+            if palabra_stem in verbos_lemma:  #Si la palabra lemmatizada esta en la lista de verbos lemmatizados
+                tupla = (palabra, 'V') #Creamos una nueva tupla con la palabra etiquetada como verbo
+                tagged.append(tupla)
+            else:
+                tupla=(palabra,tag)
+                tagged.append(tupla)
+        self.diario_etiquetado = tagged
+
+    def etiquetado_dicc(self):
+        f = codecs.open(self.ruta_dicc_etiquetado, 'r')
+        texto = f.readlines()
+        f.close() 
+        palabras_etiquetadas = {}
+        for line in texto:
+            linea = line.strip().split()
+            palabras_etiquetadas[linea[0]] = linea[1]
+
+        tagged = []
+        for palabra,tag in (self.diario_etiquetado):
+            if palabra in palabras_etiquetadas:  #Si la palabra esta en la lista de nombres
+                etiqueta = palabras_etiquetadas.get(palabra)
+                tupla = (palabra, etiqueta) #Creamos una nueva tupla con la palabra etiquetada como nombre
+                tagged.append(tupla)
+            elif tag == None:
+                tupla=(palabra,'S')
+                tagged.append(tupla)
+            else: 
+                tupla=(palabra,tag)
+                tagged.append(tupla)
+        self.diario_etiquetado = tagged
     
     def etiquetado(self):
         self.etiquetado_regex()
         self.etiquetado_nombres()
+        self.etiquetado_verbos()
+        self.etiquetado_dicc()
 
 def main():
     contenido_diario = "Hoy empecé el día tomando un buen desayuno, con café y postre. Luego de esto fui al trabajo, soy periodista y he tenido que investigar bastante en estos días. Casi no me ha dejado tiempo para compartir con algunos amigos, pero estoy bien porque me gusta lo que hago. En la tarde cuando salía de hacer mis labores me encontré con Nick, él es mi vecino y me parece muy guapo. Me invitó a cenar, acepté y la pasamos genial. Cuando llegué a mi casa me di cuenta que se me había olvidado pagar los servicios, por lo que no tenía nada de luz. Toqué la puerta de Nick, pero al parecer se había quedado profundamente dormido. Así que tuve que improvisar al prender unas velas y estuve observando mucho por la ventana a los caminantes nocturnos, cosa que no hacía desde hace mucho. En seguida noté que había muchos vagabundos y me pregunté: ¿Qué habrá pasado para que terminaran en ese lugar? Después de no encontrar respuestas a mi pregunta me hice poco de té. Apenas y podía ver la llama de la candela. Alguien tocaba a la puerta y pude ver por el picaporte que era Nick. Me sentí muy aliviada en ese momento, así que le abrí, pudimos conversar un rato y me invitó a pasar la noche en su casa. Al día siguiente me devolví a mi hogar, al pasarla junto con mi vecino tenía muchas emociones juntas y en realidad se convirtió en la mejor noche de mi vida. Y sin más que agregar, buenas noches y hasta mañana."
-    p = sentences(contenido_diario, 'nombres.txt')
+    p = sentences(contenido_diario, 'nombres.txt', 'verbos.txt', 'dicc.txt')
     p.etiquetado()
 
     print(p.diario_etiquetado)
