@@ -2,6 +2,8 @@ from sklearn.externals import joblib
 import nltk
 import re
 from nltk.stem.snowball import SnowballStemmer
+import oraciones
+from oraciones import sentences
 
 class PreprocesamientoGET:
     '''Realiza el preprocesamiento del texto del diario'''
@@ -13,10 +15,10 @@ class PreprocesamientoGET:
         self.ruta_stopwords_es = ruta_stopwords_es
 
     def crearOraciones(self, texto):
-        sentences = []
-        sent_tokenizer = nltk.data.load(self.ruta_spanish_pickle)
-        sentences = sent_tokenizer.tokenize(texto)
-        return sentences
+        p = sentences(texto, 'nombres.txt', 'verbos.txt', 'dicc.txt')
+        p.crear_oraciones()
+        oraciones = p.oraciones
+        return oraciones
     
     def quitarCaracteresE(self, texto):
         texto = (re.sub('[^a-zA-Z ^ áéíóúüñ]',' ',texto)).split(' ')
@@ -105,8 +107,7 @@ class AnalisisEmocionesGet:
 
 
 def main():
-    #contenido_diario = "Hoy empecé el día tomando un buen desayuno, con café y postre. Luego de esto fui al trabajo, soy periodista y he tenido que investigar bastante en estos días. Casi no me ha dejado tiempo para compartir con algunos amigos, pero estoy bien porque me gusta lo que hago. En la tarde cuando salía de hacer mis labores me encontré con Nick, él es mi vecino y me parece muy guapo. Me invitó a cenar, acepté y la pasamos genial. Cuando llegué a mi casa me di cuenta que se me había olvidado pagar los servicios, por lo que no tenía nada de luz. Toqué la puerta de Nick, pero al parecer se había quedado profundamente dormido. Así que tuve que improvisar al prender unas velas y estuve observando mucho por la ventana a los caminantes nocturnos, cosa que no hacía desde hace mucho. En seguida noté que había muchos vagabundos y me pregunté: ¿Qué habrá pasado para que terminaran en ese lugar? Después de no encontrar respuestas a mi pregunta me hice poco de té. Apenas y podía ver la llama de la candela. Alguien tocaba a la puerta y pude ver por el picaporte que era Nick. Me sentí muy aliviada en ese momento, así que le abrí, pudimos conversar un rato y me invitó a pasar la noche en su casa. Al día siguiente me devolví a mi hogar, al pasarla junto con mi vecino tenía muchas emociones juntas y en realidad se convirtió en la mejor noche de mi vida. Y sin más que agregar, buenas noches y hasta mañana."
-    contenido_diario = "Me he dado cuenta que no hay forma más segura de saber si amas u  a la gente que viajando con ella"
+    contenido_diario = "Hoy empecé el día tomando un buen desayuno, con café y postre. Luego de esto fui al trabajo, soy periodista y he tenido que investigar bastante en estos días. Casi no me ha dejado tiempo para compartir con algunos amigos, pero estoy bien porque me gusta lo que hago. En la tarde cuando salía de hacer mis labores me encontré con Nick, él es mi vecino y me parece muy guapo. Me invitó a cenar, acepté y la pasamos genial. Cuando llegué a mi casa me di cuenta que se me había olvidado pagar los servicios, por lo que no tenía nada de luz. Toqué la puerta de Nick, pero al parecer se había quedado profundamente dormido. Así que tuve que improvisar al prender unas velas y estuve observando mucho por la ventana a los caminantes nocturnos, cosa que no hacía desde hace mucho. En seguida noté que había muchos vagabundos y me pregunté: ¿Qué habrá pasado para que terminaran en ese lugar? Después de no encontrar respuestas a mi pregunta me hice poco de té. Apenas y podía ver la llama de la candela. Alguien tocaba a la puerta y pude ver por el picaporte que era Nick. Me sentí muy aliviada en ese momento, así que le abrí, pudimos conversar un rato y me invitó a pasar la noche en su casa. Al día siguiente me devolví a mi hogar, al pasarla junto con mi vecino tenía muchas emociones juntas y en realidad se convirtió en la mejor noche de mi vida. Y sin más que agregar, buenas noches y hasta mañana."
     p = PreprocesamientoGET(contenido_diario,'spanish.pickle','stopwords_es.txt')
     p.preprocesarDiario()
 

@@ -14,7 +14,7 @@ class sentences:
         self.ruta_dicc_etiquetado = ruta_dicc_etiquetado
     
     def etiquetado_regex(self):
-        patterns=[(r'.*(cé|né|ando|iendo|ió|nó)$','V'), # Verbo en infinitivo
+        patterns=[(r'.*(cé|né|ando|iendo|ió|nó|ró)$','V'), # Verbo en infinitivo
             (r'.*mente$', 'AD'), #Advebios
             (r'.*(o|aje|ambre|an|en|in|on|un|ate|ete|ote|é|és|che|l|ma|miento|n|pa|ta|x|y|re|os)$',
             'S'), #Sustantivos
@@ -97,16 +97,16 @@ class sentences:
         self.etiquetado_dicc()
 
     def completarOraciones(self):
-        n = 5
+        n = 7
         nueva = []
         oraciones = self.oraciones
         oraciones_finales = []
         for indice, oracion in enumerate(oraciones):
             
             if(indice == len(oraciones) - 1):#Si es el ultimo elemento 
-                if len(oracion.split()) <= n: #Si el ultimo es menor a 4
+                if len(oracion.split()) <= n: #Si el ultimo es menor o igual a n
                     nueva[-1] += " " + oracion #Se concatena al FINAL del ultimo elemento de "nueva"
-                else:#Si el ultimo es mayor a 3
+                else:
                     nueva.append(oracion) #Se inserta la oracion como un nuevo elemento a "nueva"
                 oraciones[indice] = ""
             
@@ -123,7 +123,7 @@ class sentences:
                     nueva.append(oracion) #Se inserta la oracion como un nuevo elemento a "nueva"
                 oraciones[indice] = ""
 
-            elif len(oracion.split()) <= n: #Si no es el ultimo ni el primero y es menor o igual 3
+            elif len(oracion.split()) <= n: #Si no es el ultimo ni el primero y es menor o igual n
                 #Si la siguiente oracion de "oraciones" tiene mas palabras que la ultima de "nueva"
                 if nueva[-1] != '':
                     if len(oraciones[indice+1].split()) < len(nueva[-1].split()):
@@ -146,7 +146,7 @@ class sentences:
                     else:
                         nueva.append(oracion) #Se inserta la oracion como un nuevo elemento a "nueva"
                     oraciones[indice] = ""
-            else: #Si la oracion no es primera ni ultima y es mayor a 3 lo inserta directo
+            else: #Si la oracion no es primera ni ultima y es mayor a n lo inserta directo
                 nueva.append(oracion)
                 oraciones[indice] = ""
         
@@ -181,7 +181,7 @@ class sentences:
                 oraciones.append(nodo[0])
         self.oraciones = oraciones
         self.completarOraciones()
-
+'''
 def main():
     contenido_diario = "Hoy empecé el día tomando un buen desayuno, con café y postre. Luego de esto fui al trabajo, soy periodista y he tenido que investigar bastante en estos días. Casi no me ha dejado tiempo para compartir con algunos amigos, pero estoy bien porque me gusta lo que hago. En la tarde cuando salía de hacer mis labores me encontré con Nick, él es mi vecino y me parece muy guapo. Me invitó a cenar, acepté y la pasamos genial. Cuando llegué a mi casa me di cuenta que se me había olvidado pagar los servicios, por lo que no tenía nada de luz. Toqué la puerta de Nick, pero al parecer se había quedado profundamente dormido. Así que tuve que improvisar al prender unas velas y estuve observando mucho por la ventana a los caminantes nocturnos, cosa que no hacía desde hace mucho. En seguida noté que había muchos vagabundos y me pregunté: ¿Qué habrá pasado para que terminaran en ese lugar? Después de no encontrar respuestas a mi pregunta me hice poco de té. Apenas y podía ver la llama de la candela. Alguien tocaba a la puerta y pude ver por el picaporte que era Nick. Me sentí muy aliviada en ese momento, así que le abrí, pudimos conversar un rato y me invitó a pasar la noche en su casa. Al día siguiente me devolví a mi hogar, al pasarla junto con mi vecino tenía muchas emociones juntas y en realidad se convirtió en la mejor noche de mi vida. Y sin más que agregar, buenas noches y hasta mañana."
     p = sentences(contenido_diario, 'nombres.txt', 'verbos.txt', 'dicc.txt')
@@ -194,4 +194,5 @@ def main():
         print(oracion)
     
 main()
+'''
 
