@@ -1,19 +1,20 @@
 import codecs
 import nltk
 from nltk.stem.snowball import SnowballStemmer
+import re
 
 class sentences:
     '''Separa un texto en oraciones'''
     def __init__(self, diario, ruta_nombres, ruta_verbos, ruta_dicc_etiquetado):
         self.diario = diario
         self.diario_etiquetado = []
-        self.oraciones_diario = []
+        self.oraciones = []
         self.ruta_nombres = ruta_nombres
         self.ruta_verbos = ruta_verbos
         self.ruta_dicc_etiquetado = ruta_dicc_etiquetado
     
     def etiquetado_regex(self):
-        patterns=[(r'.*(ar|er|ir|cé|né|ando|iendo)$','V'), # Verbo en infinitivo
+        patterns=[(r'.*(cé|né|ando|iendo|ió|nó)$','V'), # Verbo en infinitivo
             (r'.*mente$', 'AD'), #Advebios
             (r'.*(o|aje|ambre|an|en|in|on|un|ate|ete|ote|é|és|che|l|ma|miento|n|pa|ta|x|y|re|os)$',
             'S'), #Sustantivos
@@ -95,11 +96,40 @@ class sentences:
         self.etiquetado_verbos()
         self.etiquetado_dicc()
 
+    def crear_oraciones(self):
+        self.etiquetado()
+
+        oraciones = []
+
+        grammar = '''SUJ: {<I>?<NP>?<P.*><S>*<AD>*<Y>?<AD>?<S>?<IN>?<Y>?}
+            COM: {<Y>?<IN>*<Y>?<AD>*<Y>?<NP>?<Y>?<N>?<Y>?<S>*<Y>?<N>?<Y>?<I>?<S>*}
+            ORACION: {<SUJ>+<V>+<COM>+}
+            ORACION: {<SUJ>+<V>+<COM>?<Y>?<IN>?<SUJ>+<V>+<COM>*}
+            ORACION: {<SUJ>?<COM>?<V>+<COM>*<AD>*<SUJ>?<V>?<P>?<P.*>?<V>?<COM>+}
+            '''
+
+        cp = nltk.RegexpParser(grammar)
+        tree = cp.parse(self.diario_etiquetado)
+
+        for nodo in tree:
+            if type(nodo) != tuple:
+                nodo = str(nodo)
+                nodo = re.sub('[^a-z0-9:áéíóúüñ%]+', ' ', nodo)
+                oraciones.append(nodo)
+            else:
+                oraciones.append(nodo[0])
+        self.oraciones = oraciones
+
 def main():
     contenido_diario = "Hoy empecé el día tomando un buen desayuno, con café y postre. Luego de esto fui al trabajo, soy periodista y he tenido que investigar bastante en estos días. Casi no me ha dejado tiempo para compartir con algunos amigos, pero estoy bien porque me gusta lo que hago. En la tarde cuando salía de hacer mis labores me encontré con Nick, él es mi vecino y me parece muy guapo. Me invitó a cenar, acepté y la pasamos genial. Cuando llegué a mi casa me di cuenta que se me había olvidado pagar los servicios, por lo que no tenía nada de luz. Toqué la puerta de Nick, pero al parecer se había quedado profundamente dormido. Así que tuve que improvisar al prender unas velas y estuve observando mucho por la ventana a los caminantes nocturnos, cosa que no hacía desde hace mucho. En seguida noté que había muchos vagabundos y me pregunté: ¿Qué habrá pasado para que terminaran en ese lugar? Después de no encontrar respuestas a mi pregunta me hice poco de té. Apenas y podía ver la llama de la candela. Alguien tocaba a la puerta y pude ver por el picaporte que era Nick. Me sentí muy aliviada en ese momento, así que le abrí, pudimos conversar un rato y me invitó a pasar la noche en su casa. Al día siguiente me devolví a mi hogar, al pasarla junto con mi vecino tenía muchas emociones juntas y en realidad se convirtió en la mejor noche de mi vida. Y sin más que agregar, buenas noches y hasta mañana."
     p = sentences(contenido_diario, 'nombres.txt', 'verbos.txt', 'dicc.txt')
-    p.etiquetado()
+    p.crear_oraciones()
 
-    print(p.diario_etiquetado)
+    oraciones = p.oraciones
+
+    for oracion in oraciones:
+        print('-------')
+        print(oracion)
     
 main()
+
